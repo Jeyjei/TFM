@@ -40,10 +40,10 @@ library(MBC)
 for (j_sesion in seq(1, 12, by = 1)) {
 
   # setwd(file.path("/home", "juanjose", "Documentos", "Mis_proyectos"))
-  path_Datos <- file.path("/lustre", "gmeteo", "WORK", "velascohj", "Datos") #file.path(getwd(), "Datos") # file.path("/lustre", "gmeteo", "WORK", "velascohj", "Datos") # file.path(getwd(), "Datos")
+  path_Datos <- file.path("/lustre", "gmeteo", "WORK", "velascohj", "Datos") #file.path(getwd(), "Datos") # file.path("/lustre", "gmeteo", "WORK", "velascohj", "Datos") 
   path_Datos_iberia_metadatos <- file.path(getwd(), "Datos")
-  path_Codigo <- file.path(getwd(), "Codigo")
-  path_Datos_save <- file.path("/lustre", "gmeteo", "WORK", "velascohj", "Datos") #file.path(getwd(), "Datos") #file.path("/lustre", "gmeteo", "WORK", "velascohj", "Datos") # file.path(getwd(), "Datos") 
+  path_Codigo <- file.path(getwd(), "Scripts") # file.path(getwd(), "Codigo")
+  path_Datos_save <- file.path("/lustre", "gmeteo", "WORK", "velascohj", "Datos")  # file.path(getwd(), "Datos") 
   folder_saved <- "CodexDev_univariados_season"
 
   

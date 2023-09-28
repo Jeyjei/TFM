@@ -12,7 +12,8 @@ gc()
 #' Declaramos los paths de los códigos y datos
 #' -----------------------------------------------------------------------------
 
-setwd(file.path("/home", "juanjose", "Documentos", "Mis_proyectos"))
+# setwd(file.path("/home", "juanjose", "Documentos", "Mis_proyectos"))
+setwd(file.path(getwd(), "4. MASTER DATA UC", "Master_2022", "M1985_TFM"))
 path_Datos <- file.path(getwd(), "Datos") # file.path("/lustre", "gmeteo", "WORK", "velascohj", "Datos") #
 path_Datos_iberia_metadatos <- file.path(getwd(), "Datos")
 path_Codigo <- file.path(getwd(), "Codigo")
@@ -111,7 +112,7 @@ load_and_extract <- function(path) {
 
 
 # Dibuja un mapa en función del grid dado
-plot_custom_map <- function(grid, name_title = "Title", min.value = NULL, max.value = NULL) {
+plot_custom_map <- function(grid, name_title = "Title", min.value = NULL, max.value = NULL, name.palette = NULL, rev.colors = FALSE, n.bins = 20) {
 
   # Definición línea de costa sobre el grid
   # x_lim <- c(floor(min(grid$xyCoords$x) - attr(grid$xyCoords, "resX")),
@@ -141,93 +142,48 @@ plot_custom_map <- function(grid, name_title = "Title", min.value = NULL, max.va
   )
   coast <- map2SpatialLines(coast) # coastlines (for maps)
 
-  # Dibujado de mapas
-  mxvalue <- suppressMessages(aggregateGrid(climatology(grid), aggr.spatial = list(FUN = "max", na.rm = TRUE))$Data[1])
-  mnvalue <- suppressMessages(aggregateGrid(climatology(grid), aggr.spatial = list(FUN = "min", na.rm = TRUE))$Data[1])
-  qnvalue <- suppressMessages(aggregateGrid(climatology(grid), aggr.spatial = list(FUN = "quantile", probs = c(0.05, 0.5, 0.95), na.rm = TRUE))$Data)
-  print(qnvalue)
-  
-  if (abs(diff(c(mxvalue, mnvalue))) <= 1) {
-    max_value <- mxvalue
-    min_value <- mnvalue
-  } else {
-    max_value <- ceiling(mxvalue)
-    min_value <- floor(mnvalue)
-  }
-  message("\nSUGGEST: min_value:", min_value, "\tmax_value:", max_value)
+  clim_min <- ceiling(quantile(as.vector(grid$Data), probs = c(0.02), na.rm = T)) # extremes (upper and lower) for a zero-centered colormap
+  clim_max <- ceiling(quantile(as.vector(grid$Data), probs = c(0.98), na.rm = T))
+  cmap.nbins <- n.bins # number of bins in the colorbar
+  cmap.delta <- rev(colorRampPalette(brewer.pal(9, "RdBu"))(cmap.nbins)) # color palette for biases (red-white-blue)
+  seq_used <- round(seq(clim_min, clim_max, abs(clim_min - clim_max) / cmap.nbins), 0)
 
-  if (!(is.null(min.value))) {
-    min_value <- min.value
-  }
-  if (!(is.null(max.value))) {
-    max_value <- max.value
-  }
 
-  # Mostramos los límites del colorbar
-  message("USED: min_value:", min_value, "\tmax_value:", max_value)
-
-  N_int <- abs(diff(c(max_value, min_value)))
-
-  if (N_int > 20) {
-    N_int <- 10
-    cuts <- N_int + 1
-    seq_used <- round(seq(min_value, max_value, length.out = cuts))
-  } else {
-    if (N_int > 13) { # Más de 15 enteros entre el máximo y el mínimo
-      seq_used <- round(seq(min_value, max_value, by = 2))
-      cuts <- N_int
-    } else { # Menos de 15 enteros entre el máximo y el mínimo
-      if (N_int < 10) {
-        N_int <- 10
-      }
-      cuts <- N_int + 1
-      seq_used <- seq(min_value, max_value, length.out = cuts)
-    }
+  cmap.delta <- colorRampPalette(brewer.pal(9, name_palette))(cmap.nbins)
+  if (isTRUE(rev.colors)) {
+    cmap.delta <- rev(cmap.delta)
   }
-  figw <- 10
-
-  # Definir la paleta de colores
-  if (grid$Variable$varName %in% c("tas", "tg", "tasmax", "tasmin")) {
-    name_palette <- "YlOrRd"
-    rev_colors <- FALSE
-  } else if (grid$Variable$varName %in% c("pr")) {
-    name_palette <- "Blues"
-    rev_colors <- FALSE
-  } else {
-    name_palette <- "Spectral"
-    rev_colors <- TRUE
-  }
-  color_palette <- colorRampPalette(brewer.pal(9, name_palette))(cuts + 1)
 
   spatialPlot(
     grid = grid,
     sp.layout = list(list(coast, first = FALSE)),
     scales = list(draw = TRUE),
-    main = list(label = name_title, cex = 0.9),
-    names.attr = c("sub1", "sub2"),
-    par.strip.text = list(cex = 0.9),
+    main = list(label = name_title, cex = 2),
+    par.strip.text = list(cex = 0.75),
     as.table = TRUE,
     layout = c(1, 1),
-    set.min = min_value, set.max = max_value, # Rango de temperaturas
-    xlim = x_lim, ylim = y_lim,
-    col.regions = color_palette,
-    cuts = cuts,
-    rev.colors = rev_colors,
+    set.min = clim_min, set.max = clim_max, # Rango
+    # xlim = x_lim, ylim = y_lim,
+    col.regions = cmap.delta,
+    at = seq_used,
+    # cuts = cuts,
+    # rev.colors = TRUE,
     colorkey = list(
-      labels = list(at = seq_used), # Etiquetas del colorbar
+      labels = list(at = seq_used, cex = 1.3), # Etiquetas del colorbar
       right = list(
         fun = "draw.colorkey",
         args = list(
           key = list(
             at = seq_used, # Posiciones de los marcadores en el colorbar
-            col = color_palette, # Paleta de colores
-            width = figw / 1.75
+            col = cmap.delta, # Paleta de colores
+            width = 1 / 1.75
           )
         )
       )
     )
   )
 }
+
 
 
 #' =============================================================================
@@ -265,24 +221,30 @@ if (!file.exists(path_filename_data)) {
   message(paste0("==> Se ha creado la carpeta: ", (path_filename_data)))
 }
 
+# Generamos (si no existe) la carpeta que contendrá las figuras
+path_filename_data <- file.path(path_Datos_save, folder_saved, "Fig1")
+if (!file.exists(path_filename_data)) {
+  dir.create(path_filename_data)
+  message(paste0("==> Se ha creado la carpeta: ", (path_filename_data)))
+}
 
 # Lista con los datos
 data_fig1 <- list()
 
 for (CV_used in CV_used_list) {
-  
+
   # Lista que almacena los datos para la CV usada
   data_fig1[[CV_used]] <- list()
-  
-  
+
+
   #' =============================================================================
   #' ========================= AÑOS CÁLIDOS Y AÑOS FRÍOS =========================
   #' =============================================================================
 
   if (CV_used == "none") {
     int_years <- (1986:2005)
-  } 
-  
+  }
+
   if (CV_used == "WarmCold") {
     # 2 - fold, uno de los años más cálidos y el otro de los años más fríos según
     # la temperatura media de Iberia01
@@ -316,7 +278,7 @@ for (CV_used in CV_used_list) {
     int_years <- (1986:2005)
   }
 
-
+  browser()
 
 
   #' =============================================================================
@@ -327,11 +289,11 @@ for (CV_used in CV_used_list) {
   path.model.i <- model_folder[[1]]
 
   for (index.code.i in index.code) {
-    
+
     # Lista que almacena los datos para el índice usado
     data_fig1[[CV_used]][[index.code.i]] <- list()
-    
-    
+
+
     tryCatch(
       {
         message(paste0("\n==================================== ", basename((path.model.i)), " ===================================="))
@@ -403,17 +365,17 @@ for (CV_used in CV_used_list) {
         )
         rm(data_all)
         gc()
-        
+
         # Lista que almacena los datos para el índice usado
         data_fig1[[CV_used]][[index.code.i]] <- data.index
         rm(data.index)
         gc()
-        
-        
-        
+
+
+
         if (isTRUE(plot_indexmap)) {
           message(paste0("Se pinta el mapa de '", index.code.i, "' para ", basename(path.model.i)))
-  
+
           # Guardamos la imagen
           base_name <- paste0("Fig1_", basename(path.model.i), "_", index.code.i, paste0(c("", BC_used, CV_used), collapse = "_"), ".Rdata")
           filename_fig1 <- file.path(path_filename_data, gsub(".Rdata", img.ext, base_name))
@@ -458,13 +420,14 @@ for (CV_used in CV_used_list) {
 #' -----------------------------------------------------------------------------
 
 # Agrupamos los grid en un MultiGrid (en función del índice)
-index.code.i <- "BEDD"
+index.code.i <- "BBLI"
 
 grid1 <- climatology(data_fig1[["none"]][[index.code.i]])
 grid2 <- climatology(data_fig1[["WarmCold"]][[index.code.i]])
-grid <- makeMultiGrid(grid1, 
-                     grid2, 
-                      skip.temporal.check = TRUE) # para el caso de 2 grids
+grid <- makeMultiGrid(grid1,
+  grid2,
+  skip.temporal.check = TRUE
+) # para el caso de 2 grids
 
 name_title <- index.code.i
 min.value <- NULL
@@ -482,9 +445,9 @@ y_lim <- c(
 
 
 coast <- map("world",
-             xlim = x_lim,
-             ylim = y_lim,
-             fill = FALSE, plot = FALSE
+  xlim = x_lim,
+  ylim = y_lim,
+  fill = FALSE, plot = FALSE
 )
 coast <- map2SpatialLines(coast) # coastlines (for maps)
 
@@ -537,12 +500,12 @@ if (index.code.i %in% c("HI", "BEDD")) {
 } else if (index.code.i %in% c("BBLI")) {
   name_palette <- "Spectral"
   rev_colors <- FALSE
-} 
+}
 
 color_palette <- colorRampPalette(brewer.pal(9, name_palette))(cuts + 1)
 
-# Como no me funciona la opción de rev_colors, invierto el vector de colores 
-# manualmente 
+# Como no me funciona la opción de rev_colors, invierto el vector de colores
+# manualmente
 if (isTRUE(rev_colors)) {
   color_palette <- rev(color_palette)
   rev_colors <- FALSE
@@ -577,3 +540,23 @@ spatialPlot(
     )
   )
 )
+
+
+# Guardamos la imagen
+fig1 <- plot_custom_map(subsetGrid(grid = data_fig1[["none"]][[index.code.i]], years = 2005), name_title = paste(index.code.i, "2005"), name.palette = "Spectral", rev.colors = FALSE, n.bins = 10)
+
+img.ext <- ".pdf"
+base_name <- paste0("Fig1_Iberia01_", index.code.i, "_V1.Rdata")
+filename_fig1 <- file.path(dirname(path_filename_data), gsub(".Rdata", img.ext, base_name))
+
+if (img.ext == ".png") {
+  png(filename_fig1)
+} else {
+  pdf(filename_fig1, width = 7, height = 5, bg = "transparent")
+}
+print(fig1)
+dev.off()
+message(paste0("\nSe guarda la imagen: ", filename_fig1))
+
+rm(fig1, filename_fig1)
+gc()

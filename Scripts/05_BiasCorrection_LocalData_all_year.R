@@ -15,8 +15,8 @@ gc()
 #setwd(file.path("/home", "juanjose", "Documentos", "Mis_proyectos"))
 path_Datos <- file.path("/lustre", "gmeteo", "WORK", "velascohj", "Datos") # file.path(getwd(), "Datos")
 path_Datos_iberia_metadatos <- file.path(getwd(), "Datos")
-path_Codigo <- file.path(getwd(), "Codigo")
-path_Datos_save <- file.path("/lustre", "gmeteo", "WORK", "velascohj", "Datos") # file.path(getwd(), "Datos")  # file.path(getwd(), "Datos") #
+file.path(getwd(), "Scripts") # path_Codigo <- file.path(getwd(), "Codigo")
+path_Datos_save <- file.path("/lustre", "gmeteo", "WORK", "velascohj", "Datos") # file.path(getwd(), "Datos")  
 folder_saved <- "CodexDev_MBC_rcp"
 
 #' Cargamos los paquetes necesarios del entorno
@@ -41,19 +41,6 @@ library(downscaleR) # para bias correction (función biasCorrection)
 # library(climate4R.indices)
 library(convertR)
 library(MBC)
-
-
-
-#' Cargamos las funciones definidas en los archivos .R de mi carpeta local sincronizadas en el GIT:
-#' -----------------------------------------------------------------------------
-
-# Definir la ruta de la carpeta local que contiene los archivos .R
-# ruta_git <- file.path(getwd(), "downscaleR")
-# Obtener la lista de archivos .R en la carpeta local y sus subcarpetas
-# archivos_git <- list.files(path = ruta_git, pattern = "\\.R$", full.names = TRUE, recursive = TRUE)
-# archivos_git <- archivos_git[!grepl("biasCorrection.R", archivos_git)]
-# Cargar cada archivo y todas sus funciones usando la función lapply() y source()
-# lapply(archivos_git, source)
 
 
 #' Cargamos las funciones auxiliares que son necesarias a lo largo del código

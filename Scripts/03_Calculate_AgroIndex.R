@@ -11,10 +11,10 @@ gc()
 
 #' Declaramos los paths de los códigos y datos
 #' -----------------------------------------------------------------------------
-setwd(file.path(getwd(), "4. MASTER DATA UC", "Master_2022","M1985_TFM"))
-path_Datos <- file.path(getwd(), "Datos") # file.path("/lustre", "gmeteo", "WORK", "velascohj", "Datos") # file.path(getwd(), "Datos")
-path_Codigo <- file.path(getwd(), "Codigo")
-path_Datos_save <- path_Datos # file.path("/lustre", "gmeteo", "WORK", "velascohj", "Datos") # path_Datos #
+# setwd(file.path(getwd(), "4. MASTER DATA UC", "Master_2022","M1985_TFM"))
+path_Datos <- file.path(getwd(), "Datos") # file.path("/lustre", "gmeteo", "WORK", "velascohj", "Datos") 
+path_Codigo <- file.path(getwd(), "Scripts") # file.path(getwd(), "Codigo")
+path_Datos_save <- path_Datos # file.path("/lustre", "gmeteo", "WORK", "velascohj", "Datos") # path_Datos 
 
 
 #' Cargamos los paquetes necesarios del entorno
@@ -31,24 +31,6 @@ library(visualizeR) # para generar figuras (función spatialPlot)
 library(downscaleR) # para bias correction (función biasCorrection)
 library(transformeR) # para transformaciones
 library(climate4R.indices)
-
-
-#' Cargamos las funciones definidas en los archivos .R de mi carpeta local sincronizadas en el GIT:
-#' -----------------------------------------------------------------------------
-
-# # Definir la ruta de la carpeta local que contiene los archivos .R
-# ruta_git <- "C:/Users/juan-/Documents/4. Git_TFM/climate4R.indices"
-# # Obtener la lista de archivos .R en la carpeta local y sus subcarpetas
-# archivos_git <- list.files(path = ruta_git, pattern = "\\.R$", full.names = TRUE, recursive = TRUE)
-# # Cargar cada archivo y todas sus funciones usando la función lapply() y source()
-# lapply(archivos_git, source)
-
-
-#' Cargamos las funciones modificadas sin sincronizar en el GIT
-#' -----------------------------------------------------------------------------
-
-# file_funciones_mod <- file.path(path_Codigo, "00_funciones_modificadas.R")
-# lapply(file_funciones_mod, source)
 
 
 #' =============================================================================

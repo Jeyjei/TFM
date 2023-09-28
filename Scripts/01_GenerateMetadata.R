@@ -13,7 +13,7 @@ gc()
 #' -----------------------------------------------------------------------------
 # setwd(file.path(getwd(), "4. MASTER DATA UC", "Master_2022", "M1985_TFM"))
 path_Datos <- file.path(getwd(), "Datos")
-path_Codigo <- file.path(getwd(), "Codigo")
+path_Codigo <- file.path(getwd(), "Scripts") # file.path(getwd(), "Codigo")
 path_Datos_save <- path_Datos
 
 #' Cargamos los paquetes necesarios del entorno
